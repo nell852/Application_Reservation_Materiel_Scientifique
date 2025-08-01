@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <title>Liste des maintenances</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1.5rem 2rem;
+            text-align: center;
+        }
+        .container {
+            max-width: 95%;
+            margin: 2rem auto;
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+        }
+        .top-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .button {
+            background-color: #3498db;
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-align: center;
+        }
+        .button:hover {
+            background-color: #2980b9;
+        }
+        .search-bar {
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+        .search-bar input {
+            padding: 0.9rem;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            outline: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        button.delete {
+            background-color: #e74c3c;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button.delete:hover {
+            background-color: #c0392b;
+        }
+        .pagination {
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .pagination button {
+            margin: 0 5px;
+            padding: 0.5rem 1rem;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .pagination button:hover {
+            background-color: #34495e;
+        }
+        .no-data {
+            text-align: center;
+            color: #7f8c8d;
+            margin-top: 2rem;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+
+<body>
+<div class="header">
+    <h1>Liste des maintenances</h1>
+</div>
+
+<div class="container">
+    <div class="top-buttons">
+        <a th:href="@{/maintenances/form}" class="button"><i class="fas fa-plus"></i> Ajouter</a>
+        <a th:href="@{/home}" class="button"><i class="fas fa-home"></i> Accueil</a>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Rechercher par équipement...">
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Équipement</th>
+            <th>Date</th>
+            <th>Actions effectuées</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="maintenanceTableBody"></tbody>
+    </table>
+
+    <div class="no-data" id="noDataMessage" style="display: none;">Aucune maintenance trouvée.</div>
+
+    <div class="pagination" id="pagination"></div>
+</div>
+
+<script>
+    let allMaintenances = [];
+    let currentPage = 1;
+    const itemsPerPage = 5;
+
+    document.getElementById('searchInput').addEventListener('input', () => {
+        currentPage = 1;
+        filterAndDisplay();
+    });
+
+    document.addEventListener('DOMContentLoaded', loadMaintenances);
+
+    async function loadMaintenances() {
+        try {
+            const response = await fetch('/api/maintenances', {
+                headers: { 'X-XSRF-TOKEN': getCsrfToken() }
+            });
+            if (!response.ok) throw new Error('Erreur de chargement');
+            allMaintenances = await response.json();
+            filterAndDisplay();
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: error.message
+            });
+        }
+    }
+
+    function filterAndDisplay() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = allMaintenances.filter(m =>
+            m.equipement.type.toLowerCase().includes(input) ||
+            m.equipement.numeroSerie.toLowerCase().includes(input)
+        );
+        displayMaintenances(filtered);
+    }
+
+    function displayMaintenances(list) {
+        const tbody = document.getElementById('maintenanceTableBody');
+        const noDataMessage = document.getElementById('noDataMessage');
+        const pagination = document.getElementById('pagination');
+
+        tbody.innerHTML = '';
+        noDataMessage.style.display = list.length ? 'none' : 'block';
+
+        const totalPages = Math.ceil(list.length / itemsPerPage);
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const paginatedList = list.slice(start, end);
+
+        paginatedList.forEach(m => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${m.equipement.type} (${m.equipement.numeroSerie})</td>
+                <td>${new Date(m.date).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                <td>${m.actionsEffectuees}</td>
+                <td>
+                    <button class="delete" onclick="deleteMaintenance(${m.id})">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        pagination.innerHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement('button');
+            btn.textContent = i;
+            btn.onclick = () => { currentPage = i; filterAndDisplay(); };
+            if (i === currentPage) {
+                btn.style.backgroundColor = '#3498db';
+            }
+            pagination.appendChild(btn);
+        }
+    }
+
+    async function deleteMaintenance(id) {
+        const confirmDelete = await Swal.fire({
+            title: 'Confirmer la suppression',
+            text: 'Voulez-vous vraiment supprimer cette maintenance ?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e74c3c',
+            cancelButtonColor: '#7f8c8d',
+            confirmButtonText: 'Oui, supprimer'
+        });
+
+        if (confirmDelete.isConfirmed) {
+            try {
+                const response = await fetch(`/api/maintenances/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-XSRF-TOKEN': getCsrfToken() }
+                });
+                if (!response.ok) throw new Error('Erreur lors de la suppression');
+                Swal.fire('Supprimé!', 'La maintenance a été supprimée.', 'success');
+                loadMaintenances();
+            } catch (error) {
+                Swal.fire('Erreur', error.message, 'error');
+            }
+        }
+    }
+
+    function getCsrfToken() {
+        return document.querySelector('meta[name="_csrf"]').content;
+    }
+</script>
+
+</body>
+</html>

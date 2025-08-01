@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tableau de Bord - Réservations</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #e3eafc; /* Bleu très clair */
+        }
+
+        .header {
+            background-color: #1e3a8a; /* Bleu foncé */
+            color: white;
+            padding: 1.5rem 2rem;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            padding: 3rem 2rem;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .panel {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.3);
+        }
+
+        .panel i {
+            font-size: 3rem;
+            color: #2563eb; /* Bleu clair pour les icônes */
+            margin-bottom: 1rem;
+        }
+
+        .panel h3 {
+            font-size: 1.6rem;
+            color: #1e3a8a; /* Bleu foncé */
+            margin-bottom: 1rem;
+        }
+
+        .panel p {
+            font-size: 1rem;
+            color: #475569; /* Gris bleuté */
+        }
+
+        .panel a {
+            display: block;
+            width: 100%;
+            height: 100%;
+            text-decoration: none;
+            color: inherit; /* Important pour ne pas avoir de texte bleu souligné */
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Gestion des Réservations</h1>
+    <p>Tableau de bord des réservations de matériel scientifique</p>
+</div>
+
+<div class="container">
+    <div class="panel">
+        <a href="/reservations/form">
+            <i class="fas fa-calendar-plus"></i>
+            <h3>Ajouter une réservation</h3>
+            <p>Effectuer une nouvelle réservation de matériel.</p>
+        </a>
+    </div>
+
+    <div class="panel">
+        <a href="/home">
+            <i class="fas fa-home"></i>
+            <h3>Accueil</h3>
+            <p>Retour au tableau de bord principal.</p>
+        </a>
+    </div>
+
+    <div class="panel">
+        <a href="/login">
+            <i class="fas fa-sign-out-alt"></i>
+            <h3>Déconnexion</h3>
+            <p>Se déconnecter du système.</p>
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des réservations</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .search-bar {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .search-bar input {
+            padding: 0.75rem;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .search-bar button {
+            padding: 0.75rem 1.5rem;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #7f8c8d;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+        .button:hover {
+            background-color: #636e72;
+        }
+        .cancel-button {
+            padding: 8px 16px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .cancel-button:hover {
+            background-color: #c0392b;
+        }
+        .chercheur {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Liste des réservations</h2>
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Rechercher par équipement...">
+        <button onclick="searchReservations()">Rechercher</button>
+    </div>
+    <div id="error" class="error" style="display: none;"></div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Chercheur</th>
+                <th>Équipement</th>
+                <th>Date de début</th>
+                <th>Date de fin</th>
+                <th>Statut</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="reservationTableBody"></tbody>
+    </table>
+
+    <a th:href="@{/reservations}" class="button">Retour</a>
+</div>
+
+<script>
+    async function searchReservations() {
+        const input = document.getElementById('searchInput').value;
+        const url = input ? `/api/reservations?search=${encodeURIComponent(input)}` : '/api/reservations';
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    'X-XSRF-TOKEN': getCsrfToken()
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Erreur réseau');
+            }
+            const reservations = await response.json();
+            updateTable(reservations);
+            document.getElementById('error').style.display = 'none';
+        } catch (error) {
+            document.getElementById('error').textContent = 'Impossible de charger les réservations';
+            document.getElementById('error').style.display = 'block';
+            updateTable([]);
+        }
+    }
+
+    function updateTable(reservations) {
+        const tbody = document.getElementById('reservationTableBody');
+        tbody.innerHTML = '';
+        if (reservations.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td colspan="6" style="text-align: center;">Aucune réservation trouvée.</td>`;
+            tbody.appendChild(row);
+            return;
+        }
+        reservations.forEach(reservation => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="chercheur">${reservation.utilisateur.nom}</td>
+                <td>${reservation.equipement.type} (${reservation.equipement.numeroSerie})</td>
+                <td>${new Date(reservation.dateDebut).toLocaleString()}</td>
+                <td>${new Date(reservation.dateFin).toLocaleString()}</td>
+                <td>${reservation.statut}</td>
+                <td>
+                    <button class="cancel-button" onclick="cancelReservation(${reservation.id})">Annuler</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    async function cancelReservation(id) {
+        if (!confirm('Voulez-vous vraiment annuler cette réservation ?')) return;
+        try {
+            const response = await fetch(`/api/reservations/cancel/${id}`, {
+                method: 'POST',
+                headers: {
+                    'X-XSRF-TOKEN': getCsrfToken()
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Erreur lors de l\'annulation');
+            }
+            Swal.fire({
+                icon: 'success',
+                title: 'Succès',
+                text: 'Réservation annulée'
+            });
+            searchReservations();
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: error.message
+            });
+        }
+    }
+
+    function getCsrfToken() {
+        const token = document.querySelector('meta[name="_csrf"]').content;
+        return token;
+    }
+
+    document.addEventListener('DOMContentLoaded', searchReservations);
+</script>
+</body>
+</html>

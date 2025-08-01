@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ajouter une réservation</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #e3eafc; /* Bleu très clair */
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 60px auto;
+            padding: 40px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2);
+        }
+
+        h2 {
+            text-align: center;
+            color: #1e3a8a; /* Bleu foncé */
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 20px;
+            display: block;
+            color: #1e3a8a; /* Bleu foncé */
+            font-size: 1rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: #f1f5f9;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #2563eb; /* Bleu clair */
+            outline: none;
+            background-color: #ffffff;
+        }
+
+        .error {
+            color: red;
+            font-size: 0.9rem;
+            display: block;
+            margin-top: 5px;
+        }
+
+        button {
+            margin-top: 30px;
+            padding: 14px 30px;
+            background-color: #2563eb; /* Bleu clair */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #1e40af; /* Bleu plus foncé */
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background-color: #64748b; /* Gris bleuté */
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #475569;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Ajouter une réservation</h2>
+
+        <div th:if="${error}" class="error" th:text="${error}"></div>
+
+        <form th:action="@{/reservations}" method="post">
+            <div>
+                <label for="equipementId">Équipement :</label>
+                <select id="equipementId" name="equipementId" required>
+                    <option value="">-- Sélectionner un équipement --</option>
+                    <option th:each="equipement : ${equipements}" 
+                            th:value="${equipement.id}" 
+                            th:text="${equipement.type + ' (' + equipement.numeroSerie + ')'}">
+                    </option>
+                </select>
+            </div>
+
+            <div>
+                <label for="dateDebut">Date de début :</label>
+                <input type="datetime-local" id="dateDebut" name="dateDebut" required>
+            </div>
+
+            <div>
+                <label for="dateFin">Date de fin :</label>
+                <input type="datetime-local" id="dateFin" name="dateFin" required>
+            </div>
+
+            <div>
+                <label for="statut">Statut :</label>
+                <select id="statut" name="statut" required>
+                    <option value="">-- Sélectionner un statut --</option>
+                    <option th:each="statut : ${statuts}" 
+                            th:value="${statut}" 
+                            th:text="${statut}"></option>
+                </select>
+            </div>
+
+            <button type="submit">Enregistrer</button>
+        </form>
+
+        <a th:href="@{/reservations}" class="button">Annuler</a>
+    </div>
+</body>
+</html>

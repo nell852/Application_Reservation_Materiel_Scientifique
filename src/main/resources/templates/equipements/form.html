@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter/Modifier un équipement</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> <!-- Icônes -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #e3eafc; /* Bleu très clair */
+        }
+
+        .header {
+            background-color: #1e3a8a; /* Bleu foncé */
+            color: white;
+            padding: 1rem 2rem;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2);
+        }
+
+        h2 {
+            text-align: center;
+            color: #1e3a8a; /* Bleu foncé */
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        label {
+            font-size: 1.1rem;
+            color: #1e3a8a; /* Bleu foncé */
+            margin-bottom: 0.5rem;
+        }
+
+        input, select {
+            padding: 0.8rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f1f5f9; /* Gris clair */
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2563eb; /* Bleu clair */
+            background-color: #ffffff;
+        }
+
+        .error {
+            color: red;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        button, .button {
+            padding: 0.8rem;
+            background-color: #2563eb; /* Bleu clair */
+            color: white;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: center;
+        }
+
+        button:hover, .button:hover {
+            background-color: #1e40af; /* Bleu plus foncé */
+        }
+
+        .button {
+            text-align: center;
+            display: inline-block;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .button a {
+            color: white;
+            text-decoration: none;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Gestion du Matériel Scientifique</h1>
+    <p>Ajoutez ou modifiez un équipement</p>
+</div>
+
+<div class="container">
+    <h2 th:text="${equipement.id} ? 'Modifier un équipement' : 'Ajouter un équipement'"></h2>
+
+    <form th:action="@{/equipements}" th:object="${equipement}" method="post">
+        <div>
+            <label for="type">Type :</label>
+            <input type="text" id="type" th:field="*{type}" required>
+            <span th:errors="*{type}" class="error"></span>
+        </div>
+
+        <div>
+            <label for="numeroSerie">Numéro de série :</label>
+            <input type="text" id="numeroSerie" th:field="*{numeroSerie}" required>
+            <span th:errors="*{numeroSerie}" class="error"></span>
+        </div>
+
+        <div>
+            <label for="etat">État :</label>
+            <select id="etat" th:field="*{etat}" required>
+                <option th:each="etat : ${etats}" th:value="${etat}" th:text="${etat}"></option>
+            </select>
+        </div>
+
+        <div>
+            <label for="laboratoire">Laboratoire :</label>
+            <input type="text" id="laboratoire" th:field="*{laboratoire}" required>
+            <span th:errors="*{laboratoire}" class="error"></span>
+        </div>
+
+        <button type="submit">Enregistrer</button>
+    </form>
+
+    <a th:href="@{/equipements}" class="button">
+        <span class="fas fa-arrow-left"></span> Annuler
+    </a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription - Gestion Matériel Scientifique</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .auth-container {
+            display: flex;
+            background: #2a2a4a;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .welcome-section {
+            background: linear-gradient(135deg, #6b48ff 0%, #3a1c71 100%);
+            color: white;
+            padding: 40px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .welcome-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .welcome-section p {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .form-section {
+            background: #1a1a2e;
+            padding: 40px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-section h2 {
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            color: #ccc;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: #333;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            background: #444;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #6b48ff;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5438cc;
+        }
+
+        .links {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .links a {
+            color: #6b48ff;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .error, .success {
+            color: red;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .success {
+            color: green;
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                flex-direction: column;
+                max-width: 400px;
+            }
+
+            .welcome-section {
+                padding: 20px;
+            }
+
+            .welcome-section h1 {
+                font-size: 1.8rem;
+            }
+
+            .welcome-section p {
+                font-size: 0.9rem;
+            }
+
+            .form-section {
+                padding: 20px;
+            }
+
+            .form-section h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="welcome-section">
+            <h1>Créez votre compte</h1>
+            <p>Rejoignez notre plateforme pour gérer le matériel scientifique !</p>
+        </div>
+        <div class="form-section">
+            <h2>Inscription</h2>
+            <div th:if="${successMessage}" class="success" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="error" th:text="${errorMessage}"></div>
+            <form th:action="@{/signup}" th:object="${utilisateur}" method="post">
+                <div class="input-group">
+                    <label for="nom">Nom</label>
+                    <input type="text" id="nom" th:field="*{nom}" required>
+                    <div th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}" class="error"></div>
+                </div>
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" th:field="*{email}" required>
+                    <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error"></div>
+                </div>
+                <div class="input-group">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" th:field="*{password}" required>
+                    <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error"></div>
+                </div>
+                <div class="input-group">
+                    <label for="confirmPassword">Confirmer le mot de passe</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                </div>
+                <div class="input-group">
+                    <label for="role">Rôle</label>
+                    <select id="role" th:field="*{role}" required>
+                        <option value="CHERCHEUR">Chercheur</option>
+                        <option value="GESTIONNAIRE">Gestionnaire</option>
+                    </select>
+                </div>
+                <button type="submit">S'inscrire</button>
+            </form>
+            <div class="links">
+                <a th:href="@{/login}">Déjà un compte ? Se connecter</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
