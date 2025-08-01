@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des équipements</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f9fa;
+        }
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            text-align: center;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+        }
+        .button {
+            padding: 0.8rem;
+            background-color: #3498db;
+            color: white;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: center;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+        .button:hover {
+            background-color: #2980b9;
+        }
+        .search-bar {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .search-bar input {
+            padding: 0.75rem;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .search-bar button {
+            padding: 0.75rem 1.5rem;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #2c3e50;
+            color: white;
+        }
+        td {
+            background-color: #ecf0f1;
+        }
+        td button {
+            background: none;
+            border: none;
+            color: #3498db;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+        td button.delete {
+            color: #e74c3c;
+        }
+        td button:hover {
+            color: #2980b9;
+        }
+        td button.delete:hover {
+            color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>Gestion du Matériel Scientifique</h1>
+    <p>Liste des équipements</p>
+</div>
+
+<div class="container">
+    <h2>Liste des équipements</h2>
+    <a th:href="@{/equipements/form}" class="button">
+        <i class="fas fa-plus-circle"></i> Ajouter un équipement
+    </a>
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Rechercher un équipement...">
+        <button onclick="searchEquipment()">Rechercher</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Numéro de série</th>
+                <th>État</th>
+                <th>Laboratoire</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="equipmentTableBody"></tbody>
+    </table>
+
+    <a th:href="@{/home}" class="button">
+        <i class="fas fa-home"></i> Retour à l'accueil
+    </a>
+</div>
+
+<script>
+    async function searchEquipment() {
+        const input = document.getElementById('searchInput').value;
+        const url = input ? `/api/equipements?search=${encodeURIComponent(input)}` : '/api/equipements';
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    'X-XSRF-TOKEN': getCsrfToken()
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Erreur réseau');
+            }
+            const equipements = await response.json();
+            updateTable(equipements);
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: 'Impossible de charger les équipements'
+            });
+        }
+    }
+
+    function updateTable(equipements) {
+        const tbody = document.getElementById('equipmentTableBody');
+        tbody.innerHTML = '';
+        equipements.forEach(equipement => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${equipement.type}</td>
+                <td>${equipement.numeroSerie}</td>
+                <td>${equipement.etat}</td>
+                <td>${equipement.laboratoire || 'Non spécifié'}</td>
+                <td>
+                    <button onclick="editEquipement(${equipement.id})">
+                        <i class="fas fa-edit"></i> Modifier
+                    </button>
+                    <button class="delete" onclick="deleteEquipement(${equipement.id})">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function editEquipement(id) {
+        window.location.href = `/equipements/edit/${id}`;
+    }
+
+    async function deleteEquipement(id) {
+        if (!confirm('Voulez-vous vraiment supprimer cet équipement ?')) return;
+        try {
+            const response = await fetch(`/api/equipements/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-XSRF-TOKEN': getCsrfToken()
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Erreur lors de la suppression');
+            }
+            Swal.fire({
+                icon: 'success',
+                title: 'Succès',
+                text: 'Équipement supprimé'
+            });
+            searchEquipment();
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: error.message
+            });
+        }
+    }
+
+    function getCsrfToken() {
+        const token = document.querySelector('meta[name="_csrf"]').content;
+        return token;
+    }
+
+    document.addEventListener('DOMContentLoaded', searchEquipment);
+</script>
+</body>
+</html>

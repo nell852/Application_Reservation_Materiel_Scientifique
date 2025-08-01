@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <title>MatScientist- Gestion Matériel Scientifique</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+  /* Modern, refined color palette */
+  --primary-color: #1a73e8;
+  --primary-dark: #0d47a1;
+  --secondary-color: #202124;
+  --accent-color: #4285f4;
+  --highlight-color: #8ab4f8;
+  --bg-color: #f8f9fa;
+  --card-bg: #ffffff;
+  --text-color: #202124;
+  --text-light: #ffffff;
+  --text-muted: #5f6368;
+  --border-color: #dadce0;
+  --shadow-color: rgba(60, 64, 67, 0.15);
+  --success-color: #0f9d58;
+  --error-color: #d93025;
+  --warning-color: #f29900;
+  --info-color: #4285f4;
+  
+  /* Refined spacing system */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-xxl: 3rem;
+  
+  /* Modern border-radius */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 16px;
+  --border-radius-pill: 9999px;
+  
+  /* Animation variables */
+  --transition-speed: 0.25s;
+  --transition-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base styles with improved typography */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Modern header with subtle gradient */
+.header {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+  color: var(--text-light);
+  padding: 1.2rem 2.5rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.header-title h1 {
+  font-weight: 600;
+  font-size: 1.8rem;
+  margin: 0;
+  transition: transform var(--transition-speed) var(--transition-function);
+  letter-spacing: -0.01em;
+}
+
+.header-title h1:hover {
+  transform: translateX(5px);
+}
+
+/* Refined user profile styling */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.user-profile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-pill);
+  transition: background-color var(--transition-speed) var(--transition-function);
+}
+
+.user-profile:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.user-profile i {
+  font-size: 1.5rem;
+  color: var(--text-light);
+}
+
+.user-profile span {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-light);
+}
+
+/* Sleek dropdown menu with animation */
+.profile-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--card-bg);
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 4px 20px var(--shadow-color);
+  min-width: 220px;
+  z-index: 1000;
+  animation: fadeInUp 0.2s var(--transition-function);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.profile-menu.active {
+  display: block !important;
+}
+
+.profile-menu a, 
+.profile-menu button {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.9rem 1.2rem;
+  color: var(--text-color);
+  text-decoration: none;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all var(--transition-speed) var(--transition-function);
+  font-weight: 500;
+}
+
+.profile-menu a:hover, 
+.profile-menu button:hover {
+  background-color: rgba(66, 133, 244, 0.1);
+  color: var(--primary-color);
+}
+
+/* Modern search bar */
+.search-bar {
+  display: flex;
+  align-items: center;
+  border-radius: var(--border-radius-pill);
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all var(--transition-speed) var(--transition-function);
+}
+
+.search-bar:focus-within {
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.search-bar input {
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.95rem;
+  min-width: 260px;
+  color: var(--text-light);
+  transition: all var(--transition-speed) var(--transition-function);
+}
+
+.search-bar input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.search-bar button {
+  padding: 12px 20px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+  transition: background-color var(--transition-speed) var(--transition-function);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-bar button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Layout with improved spacing */
+.container {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+  min-height: calc(100vh - 4.5rem - 4rem);
+  align-items: start;
+}
+
+/* Modern sidebar */
+.sidebar {
+  background: linear-gradient(180deg, var(--secondary-color), #2c3849);
+  color: var(--text-light);
+  padding: 1.75rem;
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 8px 30px var(--shadow-color);
+  position: sticky;
+  top: calc(4.5rem + 20px);
+  height: calc(100vh - 8rem);
+  overflow-y: auto;
+  transition: all var(--transition-speed) var(--transition-function);
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-color) rgba(255, 255, 255, 0.1);
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: var(--accent-color);
+  border-radius: 10px;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.sidebar a {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  padding: 12px 18px;
+  border-radius: var(--border-radius-md);
+  background-color: rgba(255, 255, 255, 0.06);
+  transition: all var(--transition-speed) var(--transition-function);
+  font-weight: 500;
+  border-left: 3px solid transparent;
+}
+
+.sidebar a i {
+  font-size: 1.1rem;
+  min-width: 1.5rem;
+  text-align: center;
+  opacity: 0.9;
+}
+
+.sidebar a:hover, 
+.sidebar a.active {
+  background-color: rgba(66, 133, 244, 0.25);
+  transform: translateX(6px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  color: white;
+  border-left: 3px solid var(--highlight-color);
+}
+
+/* Beautiful cards with subtle effects */
+.card {
+  background: var(--card-bg);
+  padding: 2.2rem;
+  margin-bottom: 2rem;
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 5px 20px var(--shadow-color);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-speed) var(--transition-function);
+  border-left: 5px solid var(--primary-color);
+  animation: fadeIn 0.5s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+  opacity: 0;
+  transition: opacity 0.8s var(--transition-function);
+  pointer-events: none;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(60, 64, 67, 0.15);
+}
+
+.card:hover::after {
+  opacity: 1;
+}
+
+/* Elegant section titles */
+.section-title {
+  font-size: 1.6rem;
+  margin-bottom: 1.8rem;
+  color: var(--secondary-color);
+  font-weight: 600;
+  padding-bottom: 0.8rem;
+  position: relative;
+  display: inline-block;
+  letter-spacing: -0.01em;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color), transparent);
+  border-radius: var(--border-radius-pill);
+  transition: width 0.5s var(--transition-function);
+}
+
+/* Modern stats grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-box {
+  background: linear-gradient(145deg, var(--card-bg), #f8fbfd);
+  padding: 1.8rem 1.25rem;
+  border-radius: var(--border-radius-lg);
+  text-align: center;
+  border: 1px solid rgba(233, 236, 239, 0.7);
+  transition: all var(--transition-speed) cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 
+    0 5px 15px var(--shadow-color),
+    0 0 0 1px rgba(233, 236, 239, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s var(--transition-function);
+}
+
+.stat-box:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 25px rgba(66, 133, 244, 0.15);
+}
+
+.stat-box:hover::before {
+  transform: scaleX(1);
+}
+
+.stat-icon {
+  font-size: 2rem;
+  color: var(--primary-color);
+  margin-bottom: 0.7rem;
+  opacity: 0.85;
+  transition: all 0.4s var(--transition-function);
+}
+
+.stat-box:hover .stat-icon {
+  transform: scale(1.2) translateY(-5px);
+  opacity: 1;
+  color: var(--accent-color);
+}
+
+.stat-box h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2.4rem;
+  background: linear-gradient(90deg, var(--primary-dark), var(--accent-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  letter-spacing: -0.02em;
+}
+
+.stat-box p {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Elegant table styling */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 1.5rem;
+  box-shadow: 0 5px 15px var(--shadow-color);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}
+
+th, td {
+  padding: 16px 20px;
+  text-align: left;
+}
+
+th {
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  color: var(--text-light);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+}
+
+tr {
+  background-color: var(--card-bg);
+  transition: background-color var(--transition-speed) var(--transition-function);
+}
+
+tr:nth-of-type(even) {
+  background-color: rgba(248, 250, 253, 0.8);
+}
+
+tr:hover {
+  background-color: rgba(66, 133, 244, 0.05);
+}
+
+td {
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Modern lists */
+.distribution-list,
+.top-users,
+.notification-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 1.2rem;
+}
+
+.distribution-list li,
+.top-users li,
+.notification-list li {
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--border-color);
+  transition: all var(--transition-speed) var(--transition-function);
+  border-radius: var(--border-radius-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.distribution-list li:hover,
+.top-users li:hover,
+.notification-list li:hover {
+  background-color: rgba(66, 133, 244, 0.05);
+  transform: translateX(5px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.distribution-list li:last-child,
+.top-users li:last-child,
+.notification-list li:last-child {
+  border-bottom: none;
+}
+
+/* Beautiful button styling */
+.button,
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.8rem 1.4rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: white;
+  text-decoration: none;
+  border-radius: var(--border-radius-pill);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-speed) var(--transition-function);
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4);
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+  position: relative;
+  overflow: hidden;
+}
+
+.button::after,
+button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+.button:hover,
+button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(26, 115, 232, 0.5);
+}
+
+.button:active,
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.button:focus,
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.4), 0 4px 12px rgba(26, 115, 232, 0.4);
+}
+
+.button.delete {
+  background: linear-gradient(135deg, var(--error-color), #ea4335);
+  box-shadow: 0 4px 12px rgba(217, 48, 37, 0.4);
+}
+
+.button.delete:hover {
+  background: linear-gradient(135deg, #c5221f, #ea4335);
+  box-shadow: 0 8px 20px rgba(217, 48, 37, 0.5);
+}
+
+.sidebar .button {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+/* Status messages */
+.error-message {
+  color: white;
+  background-color: var(--error-color);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  text-align: center;
+  margin: var(--spacing-md) 0;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(217, 48, 37, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.error-message::before {
+  content: '⚠️';
+  font-size: 1.2rem;
+}
+
+/* Notifications grid */
+.notifications-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.notifications-container h4 {
+  color: var(--secondary-color);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.notifications-container h4 i {
+  color: var(--primary-color);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive design improvements */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 240px 1fr;
+    padding: 1.5rem;
+  }
+  
+  .header-title h1 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .header {
+    padding: 1rem 1.5rem;
+  }
+  
+  .search-bar input {
+    min-width: 200px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+  
+  .card {
+    padding: 1.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar {
+    position: static;
+    margin-bottom: 1.5rem;
+    height: auto;
+    max-height: none;
+    padding: 1.5rem;
+  }
+  
+  .sidebar nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.8rem;
+  }
+  
+  .sidebar a {
+    padding: 0.8rem 1rem;
+  }
+  
+  .sidebar a:hover, 
+  .sidebar a.active {
+    transform: none;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .section-title {
+    font-size: 1.4rem;
+  }
+  
+  .card {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 15px;
+  }
+  
+  .header h1 {
+    font-size: 1.3rem;
+  }
+  
+  .container {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .card {
+    padding: 1.2rem;
+    border-left-width: 3px;
+  }
+  
+  .button, button {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .stat-box {
+    padding: 1.2rem 1rem;
+  }
+  
+  .stat-box h3 {
+    font-size: 1.8rem;
+  }
+  
+  .section-title {
+    font-size: 1.2rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  .notifications-container {
+    grid-template-columns: 1fr;
+  }
+  
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  th, td {
+    padding: 12px 16px;
+  }
+}
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-title">
+        <h1>Tableau de bord - Gestion Matériel Scientifique</h1>
+    </div>
+    <div class="header-right">
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Rechercher un équipement...">
+            <button onclick="searchEquipment()">Rechercher</button>
+        </div>
+        <div class="user-profile">
+            <i class="fas fa-user-circle"></i>
+            <span th:if="${utilisateur != null}" th:text="${utilisateur.nom}">Utilisateur</span>
+            <span th:if="${utilisateur == null}">Utilisateur inconnu</span>
+            <div class="profile-menu">
+                <a th:href="@{/parametres}">Paramètres</a>
+                <form th:action="@{/logout}" method="post" style="margin: 0;">
+                    <button type="submit">Déconnexion</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="sidebar">
+        <div sec:authorize="hasRole('GESTIONNAIRE')">
+            <a th:href="@{/equipements}"><i class="fas fa-flask"></i>Équipements</a>
+            <a th:href="@{/maintenances}"><i class="fas fa-tools"></i>Maintenance</a>
+        </div>
+        <div sec:authorize="hasAnyRole('CHERCHEUR', 'GESTIONNAIRE')">
+            <a th:href="@{/reservations}"><i class="fas fa-calendar-check"></i>Réservations</a>
+        </div>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="button">Déconnexion</button>
+        </form>
+    </div>
+
+    <div id="main-content">
+        <div class="card" th:if="${totalEquipements != null}" sec:authorize="hasRole('GESTIONNAIRE')">
+            <h2 class="section-title">Statistiques générales</h2>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <i class="fas fa-flask stat-icon"></i>
+                    <h3 th:text="${totalEquipements}">0</h3>
+                    <p>Équipements</p>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-calendar-check stat-icon"></i>
+                    <h3 th:text="${reservationsActives}">0</h3>
+                    <p>Réservations actives</p>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-check-circle stat-icon"></i>
+                    <h3 th:text="${disponibles}">0</h3>
+                    <p>Disponibles</p>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-cogs stat-icon"></i>
+                    <h3 th:text="${enUtilisation}">0</h3>
+                    <p>En utilisation</p>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-wrench stat-icon"></i>
+                    <h3 th:text="${enMaintenance}">0</h3>
+                    <p>En maintenance</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">Équipements</h2>
+            <table id="equipmentTable">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Numéro de série</th>
+                        <th>État</th>
+                        <th>Laboratoire</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="equipmentTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="card" th:if="${tauxOccupationParEquipement != null and not #maps.isEmpty(tauxOccupationParEquipement)}" sec:authorize="hasRole('GESTIONNAIRE')">
+            <h2 class="section-title">Taux d'occupation (30 derniers jours)</h2>
+            <table id="occupationTable">
+                <thead>
+                    <tr>
+                        <th>Équipement</th>
+                        <th>Taux</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="entry : ${tauxOccupationParEquipement}" class="equipment-row">
+                        <td th:text="${entry.key}" class="equipment-name">Microscope</td>
+                        <td>
+                            <div style="background: #eee; border-radius: 5px; overflow: hidden;">
+                                <div th:style="'width:' + ${entry.value} + '%; background: #3498db; color: white; padding: 2px 5px;'"
+                                     th:text="${#numbers.formatDecimal(entry.value, 0, 1)} + '%'">60%</div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="error-message" th:if="${tauxOccupationParEquipement == null or #maps.isEmpty(tauxOccupationParEquipement)}" sec:authorize="hasRole('GESTIONNAIRE')">
+            Aucune donnée disponible pour le taux d'occupation.
+        </div>
+
+        <div class="card" th:if="${repartitionParType != null and not #maps.isEmpty(repartitionParType)}">
+            <h2 class="section-title">Répartition par type</h2>
+            <ul id="repartitionList" class="distribution-list">
+                <li th:each="entry : ${repartitionParType}" class="equipment-row">
+                    <span th:text="${entry.key}" class="equipment-name">Type</span> : 
+                    <b th:text="${entry.value}">0</b>
+                </li>
+            </ul>
+        </div>
+        <div class="error-message" th:if="${repartitionParType == null or #maps.isEmpty(repartitionParType)}">
+            Aucune donnée disponible pour la répartition par type.
+        </div>
+
+        <div class="card top-users" th:if="${topChercheurs != null and not #lists.isEmpty(topChercheurs)}" sec:authorize="hasRole('GESTIONNAIRE')">
+            <h2 class="section-title">Chercheurs les plus actifs</h2>
+            <ul>
+                <li th:each="user : ${topChercheurs}">
+                    <span th:text="${user.key}">Nom</span> — 
+                    <b th:text="${user.value}">0</b> réservations
+                </li>
+            </ul>
+        </div>
+        <div class="error-message" th:if="${topChercheurs == null or #lists.isEmpty(topChercheurs)}" sec:authorize="hasRole('GESTIONNAIRE')">
+            Aucun chercheur actif trouvé.
+        </div>
+
+        <div class="card maintenance-history" th:if="${maintenances != null and not #lists.isEmpty(maintenances)}">
+            <h2 class="section-title">Historique des maintenances</h2>
+            <ul id="maintenanceList" class="notification-list">
+                <li th:each="m : ${maintenances}" class="equipment-row">
+                    <span th:text="${m.equipement?.type} + ' (' + ${m.equipement?.numeroSerie} + ')'" class="equipment-name">Microscope</span> — 
+                    <span th:text="${#temporals.format(m.date, 'dd/MM/yyyy HH:mm')}">2025-04-10</span> — 
+                    <i th:text="${m.actionsEffectuees}">Changement de pièce</i>
+                </li>
+            </ul>
+        </div>
+        <div class="error-message" th:if="${maintenances == null or #lists.isEmpty(maintenances)}">
+            Aucun historique de maintenance disponible.
+        </div>
+
+        <div class="card" th:if="${frequenceMaintenances != null and not #maps.isEmpty(frequenceMaintenances)}">
+            <h2 class="section-title">Fréquence des maintenances par équipement</h2>
+            <table id="maintenanceFreqTable">
+                <thead>
+                    <tr>
+                        <th>Équipement</th>
+                        <th>Nombre d'interventions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="entry : ${frequenceMaintenances}" class="equipment-row">
+                        <td th:text="${entry.key}" class="equipment-name">Microscope</td>
+                        <td th:text="${entry.value}">0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="error-message" th:if="${frequenceMaintenances == null or #maps.isEmpty(frequenceMaintenances)}">
+            Aucune donnée disponible pour la fréquence des maintenances.
+        </div>
+
+        <div class="card notifications-container" th:if="${bientotLibres != null or seTerminantAujourdhui != null}" sec:authorize="hasRole('GESTIONNAIRE')">
+            <h2 class="section-title">Notifications</h2>
+            <h4><i class="fas fa-bell"></i>Équipements bientôt disponibles (dans les 3 jours)</h4>
+            <ul id="bientotLibresList" class="notification-list">
+                <li th:each="r : ${bientotLibres}" class="equipment-row">
+                    <span th:text="${r.equipement?.type} + ' (' + ${r.equipement?.numeroSerie} + ')'" class="equipment-name">Microscope</span> — 
+                    <i>Disponible le </i><span th:text="${#temporals.format(r.dateFin, 'dd/MM/yyyy HH:mm')}">2025-04-20</span>
+                </li>
+                <li th:if="${#lists.isEmpty(bientotLibres)}">Aucun équipement bientôt disponible.</li>
+            </ul>
+            <h4><i class="fas fa-clock"></i>Rappels : Fin de réservation aujourd'hui</h4>
+            <ul id="seTerminantAujourdhuiList" class="notification-list">
+                <li th:each="r : ${seTerminantAujourdhui}" class="equipment-row">
+                    <span th:text="${r.equipement?.type} + ' (' + ${r.equipement?.numeroSerie} + ')'" class="equipment-name">Centrifugeuse</span> — 
+                    <i>Réservation par </i><span th:text="${r.utilisateur?.nom}">Alice</span>
+                </li>
+                <li th:if="${#lists.isEmpty(seTerminantAujourdhui)}">Aucune réservation se termine aujourd'hui.</li>
+            </ul>
+        </div>
+        <div class="error-message" th:if="${bientotLibres == null and seTerminantAujourdhui == null}" sec:authorize="hasRole('GESTIONNAIRE')">
+            Aucune notification disponible.
+        </div>
+    </div>
+</div>
+
+<script>
+    async function searchEquipment() {
+        const input = document.getElementById('searchInput').value;
+        const url = input ? `/api/equipements?search=${encodeURIComponent(input)}` : '/api/equipements';
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    'X-XSRF-TOKEN': getCsrfToken()
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Erreur réseau');
+            }
+            const equipements = await response.json();
+            updateEquipmentTable(equipements);
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: 'Impossible de charger les équipements'
+            });
+        }
+    }
+
+    function updateEquipmentTable(equipements) {
+        const tbody = document.getElementById('equipmentTableBody');
+        tbody.innerHTML = '';
+        if (equipements.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td colspan="5" style="text-align: center;">Aucun équipement trouvé.</td>`;
+            tbody.appendChild(row);
+            return;
+        }
+        equipements.forEach(equipement => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${equipement.type}</td>
+                <td>${equipement.numeroSerie}</td>
+                <td>${equipement.etat}</td>
+                <td>${equipement.laboratoire}</td>
+                <td>
+                    <button class="button" onclick="viewDetails(${equipement.id})">Détails</button>
+                    <button sec:authorize="hasRole('GESTIONNAIRE')" class="button" onclick="editEquipement(${equipement.id})">Modifier</button>
+                    <button sec:authorize="hasRole('GESTIONNAIRE')" class="button delete" onclick="deleteEquipement(${equipement.id})">Supprimer</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    async function viewDetails(id) {
+        try {
+            const response = await fetch(`/api/equipements/${id}`, {
+                headers: {
+                    'X-XSRF-TOKEN': getCsrfToken()
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Équipement non trouvé');
+            }
+            const equipement = await response.json();
+            Swal.fire({
+                title: equipement.type,
+                html: `
+                    Numéro de série: ${equipement.numeroSerie}<br>
+                    État: ${equipement.etat}<br>
+                    Laboratoire: ${equipement.laboratoire}
+                `,
+                icon: 'info'
+            });
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: error.message
+            });
+        }
+    }
+
+    function editEquipement(id) {
+        window.location.href = `/equipements/edit/${id}`;
+    }
+
+    async function deleteEquipement(id) {
+        if (!confirm('Voulez-vous vraiment supprimer cet équipement ?')) return;
+        try {
+            const response = await fetch(`/api/equipements/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-XSRF-TOKEN': getCsrfToken()
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Erreur lors de la suppression');
+            }
+            Swal.fire({
+                icon: 'success',
+                title: 'Succès',
+                text: 'Équipement supprimé'
+            });
+            searchEquipment();
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: error.message
+            });
+        }
+    }
+
+    function getCsrfToken() {
+        return document.querySelector('meta[name="_csrf"]').content;
+    }
+
+    document.addEventListener('DOMContentLoaded', searchEquipment);
+
+    document.querySelector('.user-profile').addEventListener('click', function (e) {
+        e.stopPropagation();
+        const menu = this.querySelector('.profile-menu');
+        menu.classList.toggle('active');
+    });
+
+    document.addEventListener('click', function (event) {
+        const profile = document.querySelector('.user-profile');
+        if (!profile.contains(event.target)) {
+            profile.querySelector('.profile-menu').classList.remove('active');
+        }
+    });
+</script>
+
+<div sec:authorize="hasRole('GESTIONNAIRE')">
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            const bientotLibres = /*[[${bientotLibres}]]*/ [];
+            const seTerminantAujourdhui = /*[[${seTerminantAujourdhui}]]*/ [];
+
+            let messages = [];
+            if (bientotLibres && bientotLibres.length > 0) {
+                bientotLibres.forEach(r => {
+                    const message = `Équipement bientôt disponible : ${r.equipement.type} (${r.equipement.numeroSerie}) - Disponible le ${r.dateFin}`;
+                    messages.push(message);
+                });
+            }
+            if (seTerminantAujourdhui && seTerminantAujourdhui.length > 0) {
+                seTerminantAujourdhui.forEach(r => {
+                    const message = `Rappel : Réservation se termine aujourd'hui pour ${r.equipement.type} (${r.equipement.numeroSerie}) par ${r.utilisateur.nom}`;
+                    messages.push(message);
+                });
+            }
+            if (messages.length > 0) {
+                messages.forEach((message, index) => {
+                    setTimeout(() => {
+                        Swal.fire({
+                            title: 'Notification',
+                            text: message,
+                            icon: 'info',
+                            confirmButtonText: 'OK',
+                            position: 'top-end',
+                            timer: 5000,
+                            timerProgressBar: true,
+                            toast: true,
+                            showConfirmButton: false
+                        });
+                    }, index * 1000);
+                });
+            }
+        });
+    </script>
+</div>
+</body>
+</html>

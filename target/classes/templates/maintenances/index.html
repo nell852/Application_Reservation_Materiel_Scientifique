@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des Maintenances</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #e6f0fa; /* Bleu très clair */
+            color: #2c3e50;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #0052d4, #4364f7, #6fb1fc); /* Dégradé bleu foncé-clair */
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .header p {
+            margin-top: 0.5rem;
+            font-size: 1.1rem;
+            opacity: 0.85;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem;
+            padding: 3rem 2rem;
+        }
+
+        .panel {
+            background-color: #ffffff;
+            padding: 2rem 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .panel:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .panel i {
+            font-size: 3rem;
+            color: #007bff;
+            margin-bottom: 1rem;
+        }
+
+        .panel h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #0052d4;
+        }
+
+        .panel p {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 0;
+        }
+
+        .panel a {
+            display: block;
+            width: 100%;
+            height: 100%;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 2rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Gestion des Maintenances</h1>
+    <p>Tableau de bord des opérations de maintenance</p>
+</div>
+
+<div class="container">
+    <!-- Ajouter une maintenance -->
+    <div class="panel">
+        <a href="/maintenances/form">
+            <i class="fas fa-tools"></i>
+            <h3>Ajouter une maintenance</h3>
+            <p>Enregistrez une nouvelle opération de maintenance.</p>
+        </a>
+    </div>
+
+    <!-- Lister les maintenances -->
+    <div class="panel">
+        <a href="/maintenances/list">
+            <i class="fas fa-list"></i>
+            <h3>Lister les maintenances</h3>
+            <p>Visualisez toutes les maintenances enregistrées.</p>
+        </a>
+    </div>
+
+    <!-- Retour accueil -->
+    <div class="panel">
+        <a href="/home">
+            <i class="fas fa-home"></i>
+            <h3>Accueil</h3>
+            <p>Revenir au tableau de bord principal.</p>
+        </a>
+    </div>
+
+    <!-- Déconnexion -->
+    <div class="panel">
+        <a href="/login">
+            <i class="fas fa-sign-out-alt"></i>
+            <h3>Déconnexion</h3>
+            <p>Se déconnecter de la session en cours.</p>
+        </a>
+    </div>
+</div>
+
+</body>
+</html>
